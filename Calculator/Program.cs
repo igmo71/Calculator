@@ -60,7 +60,7 @@ namespace Calculator
             }
 
             LinkedList<string> expressionList = new LinkedList<string>();
-            foreach(string lex in expressionStack)
+            foreach (string lex in expressionStack)
             {
                 expressionList.AddFirst(lex);
             }
@@ -70,45 +70,92 @@ namespace Calculator
 
         private static string ParseBrackets(LinkedList<string> expressionList)
         {
-            LinkedList<string> resultExpressionList = new LinkedList<string>();
-            LinkedListNode<string> expressionNode;
-            for (expressionNode = expressionList.First; expressionNode != null; expressionNode = expressionNode.Next)
+            for (LinkedListNode<string> expressionNode = expressionList.First; expressionNode != null; expressionNode = expressionNode.Next)
             {
                 if (expressionNode.Value != ")")
                 {
-                    resultExpressionList.AddLast(expressionNode.Value);
                     continue;
                 }
                 else
                 {
                     LinkedList<string> bracketsList = new LinkedList<string>();
                     LinkedListNode<string> bracketNode = expressionNode.Previous;
+
                     while (bracketNode.Value != "(")
                     {
                         bracketsList.AddFirst(bracketNode.Value);
                         bracketNode = bracketNode.Previous;
                         expressionList.Remove(bracketNode.Next);
                     }
-                    expressionList.Remove(bracketNode);
-                    expressionNode = expressionNode.Next;
-                    expressionList.Remove(expressionNode.Previous);
 
                     expressionList.AddBefore(expressionNode, ParseMajorOperations(bracketsList));
+                    expressionNode = expressionNode.Previous;
+                    expressionList.Remove(bracketNode);
+                    expressionList.Remove(expressionNode.Next);
                 }
             }
 
             return ParseMajorOperations(expressionList);
         }
 
-        private static string ParseMajorOperations(LinkedList<string> bracketsStack)
+        private static string ParseMajorOperations(LinkedList<string> expressionList)
         {
-            //Queue<string> MinorOperationsQueue = new Queue<string>();
-            //foreach(var lex in bracketsStack)
-            //{
-            //    if(lex)
-            //}
+            for (LinkedListNode<string> expressionNode = expressionList.First; expressionNode != null; expressionNode = expressionNode.Next)
+            {
+                if (!(expressionNode.Value == "*" || expressionNode.Value == "/"))
+                {
+                    continue;
+                }
+                else
+                {
+                    switch (expressionNode.Value)
+                    {
+                        case "*":
+                            expressionNode.Value = (double.Parse(expressionNode.Previous.Value) * double.Parse(expressionNode.Next.Value)).ToString();
+                            break;
 
-            return "dummi";
+                        case "/":
+                            expressionNode.Value = (double.Parse(expressionNode.Previous.Value) / double.Parse(expressionNode.Next.Value)).ToString();
+                            break;
+
+                    }
+
+                    expressionList.Remove(expressionNode.Previous);
+                    expressionList.Remove(expressionNode.Next);
+                }
+            }
+
+                return ParseMinorOperations(expressionList);
+        }
+
+        private static string ParseMinorOperations(LinkedList<string> expressionList)
+        {
+            LinkedListNode<string> expressionNode = expressionList.Last;
+
+            if (expressionList.Count > 1)
+            {
+                double operand = double.Parse(expressionNode.Value);
+                expressionNode = expressionNode.Previous;
+                expressionList.RemoveLast();
+
+                switch (expressionNode.Value)
+                {
+                    case "+":
+                        {
+                            expressionList.RemoveLast();
+                            return (double.Parse(ParseMinorOperations(expressionList)) + operand).ToString();
+                        }
+
+                    case "-":
+                        {
+                            expressionList.RemoveLast();
+                            return (double.Parse(ParseMinorOperations(expressionList)) - operand).ToString();
+                        }
+                }
+
+            }
+
+            return expressionNode.Value;
         }
     }
 }
