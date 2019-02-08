@@ -9,7 +9,7 @@ namespace Calculator
         {
             while (true)
             {
-                Console.WriteLine("Please enter an arithmetic expression (output \"q\"):");
+                Console.WriteLine("Please enter an arithmetic expression (quit - \"q\"):");
                 string expression = Console.ReadLine();
                 if (expression == "q") break;
                 try
@@ -21,8 +21,6 @@ namespace Calculator
                     Console.WriteLine($"{e.Message}");
                 }
             }
-
-
         }
 
         private static string ParseString(string expression)
@@ -39,7 +37,7 @@ namespace Calculator
 
             foreach (char token in expression)
             {
-                if (char.IsNumber(token))
+                if (char.IsNumber(token) || token == ',')
                 {
                     if (isNewDigit)
                     {
@@ -56,10 +54,11 @@ namespace Calculator
                     expressionStack.Push(token.ToString());
                     isNewDigit = true;
                 }
-                else continue;
+                else throw new Exception("Invalid character");
             }
 
             LinkedList<string> expressionList = new LinkedList<string>();
+
             foreach (string lex in expressionStack)
             {
                 expressionList.AddFirst(lex);
@@ -118,6 +117,8 @@ namespace Calculator
                             expressionNode.Value = (double.Parse(expressionNode.Previous.Value) / double.Parse(expressionNode.Next.Value)).ToString();
                             break;
 
+                        default: throw new Exception("Invalid operation");
+
                     }
 
                     expressionList.Remove(expressionNode.Previous);
@@ -125,7 +126,7 @@ namespace Calculator
                 }
             }
 
-                return ParseMinorOperations(expressionList);
+            return ParseMinorOperations(expressionList);
         }
 
         private static string ParseMinorOperations(LinkedList<string> expressionList)
@@ -151,6 +152,8 @@ namespace Calculator
                             expressionList.RemoveLast();
                             return (double.Parse(ParseMinorOperations(expressionList)) - operand).ToString();
                         }
+
+                    default: throw new Exception("Invalid operation");
                 }
 
             }
