@@ -25,45 +25,63 @@ namespace Calculator
 
         private static string ParseString(string expression)
         {
-            Stack<string> expressionStack = new Stack<string>();
-            bool isNewDigit = true;
-
-            if (expression[0] == '-')
-            {
-                expressionStack.Push(expression[0].ToString());
-                expression = expression.Substring(1);
-                isNewDigit = false;
-            }
+            LinkedList<string> expressionList = new LinkedList<string>();
 
             foreach (char token in expression)
             {
-                if (char.IsNumber(token) || token == ',')
-                {
-                    if (isNewDigit)
-                    {
-                        expressionStack.Push(token.ToString());
-                        isNewDigit = false;
-                    }
-                    else
-                    {
-                        expressionStack.Push(expressionStack.Pop() + token);
-                    }
-                }
-                else if (token == '(' || token == ')' || token == '+' || token == '-' || token == '*' || token == '/')
-                {
-                    expressionStack.Push(token.ToString());
-                    isNewDigit = true;
-                }
-                else throw new Exception("Invalid character");
+                expressionList.AddLast(token.ToString());
             }
 
-            LinkedList<string> expressionList = new LinkedList<string>();
-
-            foreach (string lex in expressionStack)
+            for (LinkedListNode<string> expressionNode = expressionList.First; expressionNode != null; expressionNode = expressionNode.Next)
             {
-                expressionList.AddFirst(lex);
+                switch (expressionNode.Value)
+                {
+                    case "(":
+                    case ")":
+                    case "*":
+                    case "/":
+                    case "+":
+                    case "-":
+                        break;
+                    case "0":
+                    case "1":
+                    case "2":
+                    case "3":
+                    case "4":
+                    case "5":
+                    case "6":
+                    case "7":
+                    case "8":
+                    case "9":
+                    case ",":
+                        {
+                            if (expressionNode.Previous == null)
+                                break;
+                            else if (double.TryParse(expressionNode.Previous.Value, out double d))
+                            {
+                                expressionNode.Previous.Value += expressionNode.Value;
+                                expressionNode = expressionNode.Previous;
+                                expressionList.Remove(expressionNode.Next);
+                            }
+                            else if (expressionNode.Previous.Value == "-")
+                            {
+                                if (expressionNode.Previous.Previous == null
+                                    || expressionNode.Previous.Previous.Value == "("
+                                    || expressionNode.Previous.Previous.Value == "*"
+                                    || expressionNode.Previous.Previous.Value == "/"
+                                    || expressionNode.Previous.Previous.Value == "+"
+                                    || expressionNode.Previous.Previous.Value == "-")
+                                {
+                                    expressionNode.Previous.Value += expressionNode.Value;
+                                    expressionNode = expressionNode.Previous;
+                                    expressionList.Remove(expressionNode.Next);
+                                }
+                            }
+                        }
+                        break;
+                    default: throw new Exception("Invalid expression");
+                }
             }
-
             return ParseBrackets(expressionList);
         }
 
@@ -93,7 +111,6 @@ namespace Calculator
                     expressionList.Remove(expressionNode.Next);
                 }
             }
-
             return ParseMajorOperations(expressionList);
         }
 
@@ -117,7 +134,7 @@ namespace Calculator
                             expressionNode.Value = (double.Parse(expressionNode.Previous.Value) / double.Parse(expressionNode.Next.Value)).ToString();
                             break;
 
-                        default: throw new Exception("Invalid operation");
+                        default: throw new Exception("Invalid expression");
 
                     }
 
@@ -125,7 +142,6 @@ namespace Calculator
                     expressionList.Remove(expressionNode.Next);
                 }
             }
-
             return ParseMinorOperations(expressionList);
         }
 
@@ -153,11 +169,9 @@ namespace Calculator
                             return (double.Parse(ParseMinorOperations(expressionList)) - operand).ToString();
                         }
 
-                    default: throw new Exception("Invalid operation");
+                    default: throw new Exception("Invalid expression");
                 }
-
             }
-
             return expressionNode.Value;
         }
     }
