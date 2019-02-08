@@ -65,43 +65,50 @@ namespace Calculator
                 expressionList.AddFirst(lex);
             }
 
-            return ParseBrackets(expressionStack);
+            return ParseBrackets(expressionList);
         }
 
-        private static string ParseBrackets(Stack<string> expressionStack)
+        private static string ParseBrackets(LinkedList<string> expressionList)
         {
-            Stack<string> resultExpressionStack = new Stack<string>();
-
-            foreach(string lexeme in expressionStack)
+            LinkedList<string> resultExpressionList = new LinkedList<string>();
+            LinkedListNode<string> expressionNode;
+            for (expressionNode = expressionList.First; expressionNode != null; expressionNode = expressionNode.Next)
             {
-                if (lexeme != ")")
+                if (expressionNode.Value != ")")
                 {
-                    resultExpressionStack.Push(lexeme);
+                    resultExpressionList.AddLast(expressionNode.Value);
                     continue;
                 }
                 else
                 {
-                    Stack<string> bracketsStack = new Stack<string>();
-                    string lex;
-                    do
+                    LinkedList<string> bracketsList = new LinkedList<string>();
+                    LinkedListNode<string> bracketNode = expressionNode.Previous;
+                    while (bracketNode.Value != "(")
                     {
-                        lex = expressionStack.Pop();
-                        bracketsStack.Push(lex);
-                    } while (lex != "(");
-                    resultExpressionStack.Push(ParseMajorOperations(bracketsStack));
+                        bracketsList.AddFirst(bracketNode.Value);
+                        bracketNode = bracketNode.Previous;
+                        expressionList.Remove(bracketNode.Next);
+                    }
+                    expressionList.Remove(bracketNode);
+                    expressionNode = expressionNode.Next;
+                    expressionList.Remove(expressionNode.Previous);
+
+                    expressionList.AddBefore(expressionNode, ParseMajorOperations(bracketsList));
                 }
             }
 
-            return ParseMajorOperations(resultExpressionStack);
+            return ParseMajorOperations(expressionList);
         }
 
-        private static string ParseMajorOperations(Stack<string> bracketsStack)
+        private static string ParseMajorOperations(LinkedList<string> bracketsStack)
         {
-            Queue<string> MinorOperationsQueue = new Queue<string>();
-            foreach(var lex in bracketsStack)
-            {
-                if(lex)
-            }
+            //Queue<string> MinorOperationsQueue = new Queue<string>();
+            //foreach(var lex in bracketsStack)
+            //{
+            //    if(lex)
+            //}
+
+            return "dummi";
         }
     }
 }
