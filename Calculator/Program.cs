@@ -10,11 +10,11 @@ namespace Calculator
             while (true)
             {
                 Console.WriteLine("Please enter an arithmetic expression (quit - \"q\"):");
-                string expression = Console.ReadLine();
-                if (expression == "q") break;
+                string expressionString = Console.ReadLine();
+                if (expressionString == "q") break;
                 try
                 {
-                    Console.WriteLine(ParseString(expression));
+                    Console.WriteLine(ParseString(expressionString));
                 }
                 catch (Exception e)
                 {
@@ -23,16 +23,16 @@ namespace Calculator
             }
         }
 
-        private static string ParseString(string expression)
+        private static string ParseString(string expressionString)
         {
-            LinkedList<string> expressionList = new LinkedList<string>();
+            LinkedList<string> expression = new LinkedList<string>();
 
-            foreach (char token in expression)
+            foreach (char token in expressionString)
             {
-                expressionList.AddLast(token.ToString());
+                expression.AddLast(token.ToString());
             }
 
-            for (LinkedListNode<string> expressionNode = expressionList.First; expressionNode != null; expressionNode = expressionNode.Next)
+            for (LinkedListNode<string> expressionNode = expression.First; expressionNode != null; expressionNode = expressionNode.Next)
             {
                 switch (expressionNode.Value)
                 {
@@ -61,7 +61,7 @@ namespace Calculator
                             {
                                 expressionNode.Previous.Value += expressionNode.Value;
                                 expressionNode = expressionNode.Previous;
-                                expressionList.Remove(expressionNode.Next);
+                                expression.Remove(expressionNode.Next);
                             }
                             else if (expressionNode.Previous.Value == "-")
                             {
@@ -74,7 +74,7 @@ namespace Calculator
                                 {
                                     expressionNode.Previous.Value += expressionNode.Value;
                                     expressionNode = expressionNode.Previous;
-                                    expressionList.Remove(expressionNode.Next);
+                                    expression.Remove(expressionNode.Next);
                                 }
                             }
                         }
@@ -82,12 +82,12 @@ namespace Calculator
                     default: throw new Exception("Invalid expression");
                 }
             }
-            return ParseBrackets(expressionList);
+            return ParseBrackets(expression);
         }
 
-        private static string ParseBrackets(LinkedList<string> expressionList)
+        private static string ParseBrackets(LinkedList<string> expression)
         {
-            for (LinkedListNode<string> expressionNode = expressionList.First; expressionNode != null; expressionNode = expressionNode.Next)
+            for (LinkedListNode<string> expressionNode = expression.First; expressionNode != null; expressionNode = expressionNode.Next)
             {
                 if (expressionNode.Value != ")")
                 {
@@ -95,28 +95,28 @@ namespace Calculator
                 }
                 else
                 {
-                    LinkedList<string> bracketsList = new LinkedList<string>();
-                    LinkedListNode<string> bracketNode = expressionNode.Previous;
+                    LinkedList<string> subExpression = new LinkedList<string>();
+                    LinkedListNode<string> subExpressionNode = expressionNode.Previous;
 
-                    while (bracketNode.Value != "(")
+                    while (subExpressionNode.Value != "(")
                     {
-                        bracketsList.AddFirst(bracketNode.Value);
-                        bracketNode = bracketNode.Previous;
-                        expressionList.Remove(bracketNode.Next);
+                        subExpression.AddFirst(subExpressionNode.Value);
+                        subExpressionNode = subExpressionNode.Previous;
+                        expression.Remove(subExpressionNode.Next);
                     }
 
-                    expressionList.AddBefore(expressionNode, ParseMajorOperations(bracketsList));
+                    expression.AddBefore(expressionNode, ParseMajorOperations(subExpression));
                     expressionNode = expressionNode.Previous;
-                    expressionList.Remove(bracketNode);
-                    expressionList.Remove(expressionNode.Next);
+                    expression.Remove(subExpressionNode);
+                    expression.Remove(expressionNode.Next);
                 }
             }
-            return ParseMajorOperations(expressionList);
+            return ParseMajorOperations(expression);
         }
 
-        private static string ParseMajorOperations(LinkedList<string> expressionList)
+        private static string ParseMajorOperations(LinkedList<string> expression)
         {
-            for (LinkedListNode<string> expressionNode = expressionList.First; expressionNode != null; expressionNode = expressionNode.Next)
+            for (LinkedListNode<string> expressionNode = expression.First; expressionNode != null; expressionNode = expressionNode.Next)
             {
                 if (!(expressionNode.Value == "*" || expressionNode.Value == "/"))
                 {
@@ -138,35 +138,35 @@ namespace Calculator
 
                     }
 
-                    expressionList.Remove(expressionNode.Previous);
-                    expressionList.Remove(expressionNode.Next);
+                    expression.Remove(expressionNode.Previous);
+                    expression.Remove(expressionNode.Next);
                 }
             }
-            return ParseMinorOperations(expressionList);
+            return ParseMinorOperations(expression);
         }
 
-        private static string ParseMinorOperations(LinkedList<string> expressionList)
+        private static string ParseMinorOperations(LinkedList<string> expression)
         {
-            LinkedListNode<string> expressionNode = expressionList.Last;
+            LinkedListNode<string> expressionNode = expression.Last;
 
-            if (expressionList.Count > 1)
+            if (expression.Count > 1)
             {
                 double operand = double.Parse(expressionNode.Value);
                 expressionNode = expressionNode.Previous;
-                expressionList.RemoveLast();
+                expression.RemoveLast();
 
                 switch (expressionNode.Value)
                 {
                     case "+":
                         {
-                            expressionList.RemoveLast();
-                            return (double.Parse(ParseMinorOperations(expressionList)) + operand).ToString();
+                            expression.RemoveLast();
+                            return (double.Parse(ParseMinorOperations(expression)) + operand).ToString();
                         }
 
                     case "-":
                         {
-                            expressionList.RemoveLast();
-                            return (double.Parse(ParseMinorOperations(expressionList)) - operand).ToString();
+                            expression.RemoveLast();
+                            return (double.Parse(ParseMinorOperations(expression)) - operand).ToString();
                         }
 
                     default: throw new Exception("Invalid expression");
