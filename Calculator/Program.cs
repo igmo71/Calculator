@@ -23,6 +23,11 @@ namespace Calculator
             }
         }
 
+        /// <summary>
+        /// Разбор строки арифметического выражения
+        /// </summary>
+        /// <param name="expressionString"></param>
+        /// <returns></returns>
         private static string ParseString(string expressionString)
         {
             LinkedList<string> expression = new LinkedList<string>();
@@ -85,6 +90,11 @@ namespace Calculator
             return ParseBrackets(expression);
         }
 
+        /// <summary>
+        /// Разбор скобок
+        /// </summary>
+        /// <param name="expression"></param>
+        /// <returns></returns>
         private static string ParseBrackets(LinkedList<string> expression)
         {
             for (LinkedListNode<string> expressionNode = expression.First; expressionNode != null; expressionNode = expressionNode.Next)
@@ -114,6 +124,11 @@ namespace Calculator
             return ParseMajorOperations(expression);
         }
 
+        /// <summary>
+        /// Разбор стакрших операций - умножение, деление
+        /// </summary>
+        /// <param name="expression"></param>
+        /// <returns></returns>
         private static string ParseMajorOperations(LinkedList<string> expression)
         {
             for (LinkedListNode<string> expressionNode = expression.First; expressionNode != null; expressionNode = expressionNode.Next)
@@ -145,6 +160,11 @@ namespace Calculator
             return ParseMinorOperations(expression);
         }
 
+        /// <summary>
+        /// Разбор младших операций - сложение, вычитание
+        /// </summary>
+        /// <param name="expression"></param>
+        /// <returns></returns>
         private static string ParseMinorOperations(LinkedList<string> expression)
         {
             LinkedListNode<string> expressionNode = expression.Last;
