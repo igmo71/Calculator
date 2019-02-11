@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Calculator
 {
-    class Program
+    class Program qqq
     {
         static void Main(string[] args)
         {
